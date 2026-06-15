@@ -16,7 +16,7 @@ const sessionsDisplay = document.getElementById('sessions-display');
 let timerInterval = null;
 let isRunning = false;
 let isStarted = false;
-let phase = 'Not Started'; 
+let phase = 'Başlamadı'; 
 let totalSessions = 0;
 let studySeconds = 0;
 let breakSeconds = 0;
@@ -50,35 +50,35 @@ const updateUI = () => {
     phaseDisplay.textContent = phase;
     timeDisplay.textContent = formatTime(timeLeft);
     
-    studyTimeDisplay.textContent = `${completedMins} / ${totalMins} mins`;
+    studyTimeDisplay.textContent = `${completedMins} / ${totalMins} dk`;
     sessionsDisplay.textContent = `${completedSessions} / ${totalSessions}`;
 };
 
 const tick = () => {
     timeLeft--;
 
-    if (phase === 'Study') totalStudySecondsCompleted++;
+    if (phase === 'Ders') totalStudySecondsCompleted++;
     
     if (timeLeft <= 0) {
         switch (phase) {
-            case 'Study': 
+            case 'Ders': 
                 completedSessions++;
             
                 if (completedSessions >= totalSessions) {
                     clearInterval(timerInterval);
                     isRunning = false;
-                    phase = 'Finished';
+                    phase = 'Bitti';
                 
                 
                     startButton.disabled = true;
                     pauseButton.disabled = true;
                 } else {    
-                    phase = 'Break';
+                    phase = 'Mola';
                     timeLeft = breakSeconds;
                 }
                 break;
-            case 'Break':
-                phase = 'Study';
+            case 'Mola':
+                phase = 'Ders';
                 timeLeft = studySeconds;
                 break;
         }
@@ -93,10 +93,10 @@ startButton.addEventListener('click', () => {
         const breakValue = parseInt(breakInput.value);
 
         if (studyValue < 30 || studyValue > 120) 
-            return alert('Study session must be between 30 and 120 minutes.');
+            return alert('Ders süresi 30 ile 120 dakika arasında olmalı');
 
         if (breakValue < breakInput.min || breakValue > breakInput.max) 
-            return alert(`Break session must be between ${breakInput.min} and ${breakInput.max} minutes.`);
+            return alert(`Ara süresi ${breakInput.min} ile ${breakInput.max} dakika arasında olmalı`);
 
         totalSessions = parseInt(sessionsInput.value);
         studySeconds = studyValue * 60;
@@ -105,13 +105,13 @@ startButton.addEventListener('click', () => {
         completedSessions = 0;
         totalStudySecondsCompleted = 0;
             
-        phase = 'Study';
+        phase = 'Ders';
         isStarted = true;
         settings.disabled = true;
         resetButton.disabled = false;
     }
 
-    if (!isRunning && phase !== 'Finished') {
+    if (!isRunning && phase !== 'Bitti') {
         isRunning = true;
         startButton.disabled = true;
         pauseButton.disabled = false;
@@ -134,7 +134,7 @@ resetButton.addEventListener('click', () => {
     clearInterval(timerInterval);
     isRunning = false;
     isStarted = false;
-    phase = 'Not Started';
+    phase = 'Başlamadı';
     timeLeft = 0;
     totalStudySecondsCompleted = 0;
     completedSessions = 0;
@@ -144,9 +144,9 @@ resetButton.addEventListener('click', () => {
     startButton.disabled = false;
     pauseButton.disabled = true;
     resetButton.disabled = true;
-    phaseDisplay.textContent = 'Not Started';
+    phaseDisplay.textContent = 'Başlamadı';
     timeDisplay.textContent = '00:00';
-    studyTimeDisplay.textContent = '0 / 0 mins';
+    studyTimeDisplay.textContent = '0 / 0 dk';
     sessionsDisplay.textContent = '0 / 0';
 });
 
