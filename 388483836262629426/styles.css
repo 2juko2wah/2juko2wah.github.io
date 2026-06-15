@@ -1,10 +1,34 @@
 .info {
-  display: flex;         /* Activates flexbox layout */
-  align-items: center;   /* Vertically aligns text and image in the middle */
-  gap: 20px;             /* Adds a clean gap between the image and text */
+  display: flex;         
+  align-items: center;   
+  gap: 20px;             
 }
 
 .pulled-to-side {
-  max-width: 200px;      /* Controls the image size */
-  height: auto;          /* Maintains aspect ratio */
+  max-width: 200px;      
+  height: auto;
+}
+
+body {
+  background-color: #0d2147;
+}
+
+h3, h2, h1,legend {
+    color: #d74ac7;
+}
+
+p, label  {
+    color: #ff82bd;
+}
+
+button, input {
+  background-color: #054b84; 
+  border: 5px solid #0d2147; 
+  box-shadow: none;
+  color: #54cea7;
+}
+
+fieldset {
+  border: 5px solid #d74ac7; /* Width, style, and color */
+  border-radius: 8px;        /* Optional: rounds the corners */
 }
