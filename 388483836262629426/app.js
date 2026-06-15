@@ -55,7 +55,7 @@ const updateUI = () => {
     
     studyTimeDisplay.textContent = `${completedMins} / ${totalMins} dk`;
     sessionsDisplay.textContent = `${completedSessions} / ${totalSessions}`;
-    endTimeDisplay.textContent = `${endingTime.getHours()}:${endingTime.getMinutes()}`
+    endTimeDisplay.textContent = `${endingTime.getHours().toString().padStart(2, '0')}:${endingTime.getMinutes().toString().padStart(2, '0')}`
 };
 
 const tick = () => {
