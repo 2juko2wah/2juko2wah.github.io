@@ -1,0 +1,10 @@
+.info {
+  display: flex;         /* Activates flexbox layout */
+  align-items: center;   /* Vertically aligns text and image in the middle */
+  gap: 20px;             /* Adds a clean gap between the image and text */
+}
+
+.pulled-to-side {
+  max-width: 200px;      /* Controls the image size */
+  height: auto;          /* Maintains aspect ratio */
+}
