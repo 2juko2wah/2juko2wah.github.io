@@ -1,12 +1,8 @@
 .info {
-  display: flex;         
-  align-items: center;   
-  gap: 20px;             
-}
+  display: flow;
 
-.pulled-to-side {
-  max-width: 200px;      
-  height: auto;
+  gap: 20px;             
+  
 }
 
 body {
@@ -30,7 +26,7 @@ fieldset {
   border-radius: 6px;        /* Optional: rounds the corners */
 }
 
-.settings-form {
+.settings-form, .buttons-form {
     display:grid;
     grid-template-columns: max-content max-content;
     grid-gap:5px;
@@ -38,7 +34,24 @@ fieldset {
 .settings-form label       { text-align:right; }
 .settings-form label:after { content: ":"; }
 
-.buttons-form {
+.buttons-form, .info {
   display: flex;
-  justify-content: space-evenly; /* Change this value based on your needs */
+  justify-content: space-evenly; 
+  width: 100%;      /* Tells the div to stretch across the fieldset */
+  gap: 15px;        /* Forces a guaranteed 15px space between buttons */
+  margin-top: 15px; /* (Optional) Adds a nice visual space between the inputs and buttons */
+}
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers items horizontally when direction is column */
+  min-height: 100vh; /* Ensures body spans the full viewport height */
+}
+
+hr {
+  width: 100%; /* Or 80% if you don't want it to touch the exact edges */
+  border: none; 
+  border-top: 1px solid #ebebeb; /* Matches your text/fieldset color */
+  margin: 20px 0; /* Adds some breathing room above and below */
 }
