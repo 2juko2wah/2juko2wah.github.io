@@ -9,30 +9,30 @@
 <body>
     <h1>  </h1>
 
-    <!-- Configuration Inputs -->
-    <fieldset id="settings">
-        <legend>Ayarlar</legend>
-        
-        <p>
-            <label for="sessions">Ders Sayısı:</label>
-            <input type="number" id="sessions" min="1" value="4" required>
-        </p>
+    <div class="info">
+        <fieldset id="settings">
+            <legend>Ayarlar</legend>    
+            <p>
+                <label for="sessions">Ders Sayısı:</label>
+                <input type="number" id="sessions" min="1" value="4" required>
+            </p>
 
-        <p>
-            <label for="study-length">Ders Uzunluğu (dk):</label>
-            <input type="number" id="study-length" min="30" max="120" value="30" required>
-        </p>
+            <p>
+                <label for="study-length">Ders Uzunluğu (dk):</label>
+                <input type="number" id="study-length" min="30" max="120" value="30" required>
+            </p>
 
-        <p>
-            <label for="break-length">Ara Uzunluğu (dk):</label>
-            <input type="number" id="break-length" value="5" required>
-            <span id="break-hint"></span>
-        </p>
-    </fieldset>
+            <p>
+                <label for="break-length">Ara Uzunluğu (dk):</label>
+                <input type="number" id="break-length" value="5" required>
+                <span id="break-hint"></span>
+            </p>
+        </fieldset>
+        <img src="bearintime.jpeg" alt="It's bearin time" class="pulled-to-side">
+    </div>
 
     <br>
 
-    <!-- Controls -->
     <div>
         <button id="start-button">Başlat</button>
         <button id="pause-button" disabled>Durdur</button>
@@ -52,6 +52,7 @@
         <p>Tamamlanan Ders Sayısı: <span id="sessions-display">0 / 0</span></p>
 
         <img src="ryan.jpeg" alt="Lesbian Ryan Gosling" class="pulled-to-side">
+        <img src="motivationigga.webp" alt="Jumping into Sucess ahh" class="pulled-to-side">
     </div>
 
     <script src="app.js"></script>
