@@ -57,28 +57,27 @@ const updateUI = () => {
 const tick = () => {
     timeLeft--;
 
-    if (phase === 'Ders') totalStudySecondsCompleted++;
+    if (phase === 'Ders (kolay gelsibnnn)') totalStudySecondsCompleted++;
     
     if (timeLeft <= 0) {
         switch (phase) {
-            case 'Ders': 
+            case 'Ders (kolay gelsibnnn)': 
                 completedSessions++;
             
                 if (completedSessions >= totalSessions) {
                     clearInterval(timerInterval);
                     isRunning = false;
-                    phase = 'Bingus';
-                
+                    phase = 'Bingus (mwahhh)';
                 
                     startButton.disabled = true;
                     pauseButton.disabled = true;
                 } else {    
-                    phase = 'Mola';
+                    phase = 'Mola (yeyy, ilysmmm)';
                     timeLeft = breakSeconds;
                 }
                 break;
-            case 'Mola':
-                phase = 'Ders';
+            case 'Mola (yeyy, ilysmmm)':
+                phase = 'Ders (kolay gelsibnnn)';
                 timeLeft = studySeconds;
                 break;
         }
@@ -93,7 +92,7 @@ startButton.addEventListener('click', () => {
         const breakValue = parseInt(breakInput.value);
 
         if (studyValue < 30 || studyValue > 120) 
-            return alert('Ders süresi 30 ile 120 dakika arasında olmalı');
+            return alert('Ders (kolay gelsibnnn) süresi 30 ile 120 dakika arasında olmalı');
 
         if (breakValue < breakInput.min || breakValue > breakInput.max) 
             return alert(`Ara süresi ${breakInput.min} ile ${breakInput.max} dakika arasında olmalı`);
@@ -105,13 +104,13 @@ startButton.addEventListener('click', () => {
         completedSessions = 0;
         totalStudySecondsCompleted = 0;
             
-        phase = 'Ders';
+        phase = 'Ders (kolay gelsibnnn)';
         isStarted = true;
         settings.disabled = true;
         resetButton.disabled = false;
     }
 
-    if (!isRunning && phase !== 'Bitti') {
+    if (!isRunning && phase !== 'Bingus (mwahhh)') {
         isRunning = true;
         startButton.disabled = true;
         pauseButton.disabled = false;
