@@ -67,7 +67,7 @@ const tick = () => {
                 if (completedSessions >= totalSessions) {
                     clearInterval(timerInterval);
                     isRunning = false;
-                    phase = 'Bitti';
+                    phase = 'Bingus';
                 
                 
                     startButton.disabled = true;
