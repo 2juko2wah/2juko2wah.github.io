@@ -23,12 +23,13 @@ p, label  {
 
 button, input {
   background-color: #054b84; 
-  border: 5px solid #0d2147; 
+  border: 2px solid #54cea7; 
   box-shadow: none;
   color: #54cea7;
+  
 }
 
 fieldset {
-  border: 5px solid #d74ac7; /* Width, style, and color */
-  border-radius: 8px;        /* Optional: rounds the corners */
+  border: 2px solid #d74ac7; /* Width, style, and color */
+  border-radius: 6px;        /* Optional: rounds the corners */
 }
