@@ -30,6 +30,24 @@ let endingTime = null;
 const formatTime = (seconds) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
 const addMinutes = (date, minutes) => new Date(date.getTime() + minutes*60000);
 
+const workerCode = `
+    let timerInterval = null;
+    self.onmessage = function(e) {
+        if (e.data === 'start') {
+            timerInterval = setInterval(() => self.postMessage('tick'), 1000);
+        } else if (e.data === 'stop') {
+            clearInterval(timerInterval);
+        }
+    };
+`;
+const blob = new Blob([workerCode], { type: 'application/javascript' });
+const worker = new Worker(URL.createObjectURL(blob));
+
+// When the worker sends a 'tick' message, run your existing tick logic
+worker.onmessage = () => {
+    tick(); 
+};
+
 const updateBreakConstraints = () => {
     const studyValue = parseInt(studyInput.value);
     const breakValue = parseInt(breakInput.value);
@@ -128,7 +146,7 @@ startButton.addEventListener('click', () => {
         pauseButton.disabled = false;
         resetButton.disabled = false; // Allow user to reset while running
         
-        timerInterval = setInterval(tick, 1000);
+        worker.postMessage('start');
     }
         
     updateUI();
@@ -136,7 +154,7 @@ startButton.addEventListener('click', () => {
 
 pauseButton.addEventListener('click', () => {
     if (isRunning) {
-        clearInterval(timerInterval);
+        worker.postMessage('stop');
         isRunning = false;
         
         // Toggle buttons for paused state
@@ -147,7 +165,7 @@ pauseButton.addEventListener('click', () => {
 });
 
 resetButton.addEventListener('click', () => {
-    clearInterval(timerInterval);
+    worker.postMessage('stop');
     isRunning = false;
     isStarted = false;
     phase = 'Başlamadı';
