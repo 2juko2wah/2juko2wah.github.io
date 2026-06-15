@@ -6,42 +6,34 @@
     <title>Ryan GosTimer</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <h1>  </h1>
+<body class="center">
+    <div> 
+        <div class="info">
+            <fieldset id="settings">
+                <legend>Ayarlar</legend>
+                <div class="settings-form">            
+                    <label for="sessions">Ders Sayısı</label>
+                    <input type="number" id="sessions" min="1" value="4" required>
+                    <label for="study-length">Ders Uzunluğu (dk)</label>
+                    <input type="number" id="study-length" min="30" max="120" value="30" required>
+        
+                    <label for="break-length">Ara Uzunluğu (dk)</label>
+                    <input type="number" id="break-length" value="5" required>
+                </div>
 
-    <div class="info">
-        <fieldset id="settings">
-            <legend>Ayarlar</legend>    
-            <p>
-                <label for="sessions">Ders Sayısı:</label>
-                <input type="number" id="sessions" min="1" value="4" required>
-            </p>
-
-            <p>
-                <label for="study-length">Ders Uzunluğu (dk):</label>
-                <input type="number" id="study-length" min="30" max="120" value="30" required>
-            </p>
-
-            <p>
-                <label for="break-length">Ara Uzunluğu (dk):</label>
-                <input type="number" id="break-length" value="5" required>
-                <span id="break-hint"></span>
-            </p>
-        </fieldset>
-        <img src="bearintime.jpeg" alt="It's bearin time" class="pulled-to-side">
-    </div>
-
-    <br>
-
-    <div>
-        <button id="start-button">Başlat</button>
-        <button id="pause-button" disabled>Durdur</button>
-        <button id="reset-button" disabled>Sıfırla</button>
+                <br>
+                
+                <div class="buttons-form">
+                    <button id="start-button">Başlat</button>
+                    <button id="pause-button" disabled>Durdur</button>
+                    <button id="reset-button" disabled>Sıfırla</button>
+                </div>  
+            </fieldset>
+        </div>
     </div>
 
     <hr>
 
-    <!-- Display -->
     <h2>Şu An: <span id="phase-display">Başlamadı</span></h2>
     <h1 id="time-display">00:00</h1>
 
@@ -50,9 +42,7 @@
         <h3>İlerleme: </h3>
         <p>Çalışılan Süre: <span id="study-time-display">0 / 0 dk</span></p>
         <p>Tamamlanan Ders Sayısı: <span id="sessions-display">0 / 0</span></p>
-
-        <img src="ryan.jpeg" alt="Lesbian Ryan Gosling" class="pulled-to-side">
-        <img src="motivationigga.webp" alt="Jumping into Sucess ahh" class="pulled-to-side">
+    </div>
     </div>
 
     <script src="app.js"></script>

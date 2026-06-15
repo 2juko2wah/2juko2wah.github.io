@@ -10,26 +10,35 @@
 }
 
 body {
-  background-color: #0d2147;
+  background-color: #121212;
 }
 
-h3, h2, h1,legend {
-    color: #d74ac7;
+h3, h2, h1,legend, p, label, span {
+    color: #ebebeb;
 }
 
-p, label  {
-    color: #ff82bd;
-}
-
-button, input {
-  background-color: #054b84; 
-  border: 2px solid #54cea7; 
+input {
+  background-color: #121212; 
+  border: none; 
   box-shadow: none;
-  color: #54cea7;
+  color: #ebebeb;
   
 }
 
 fieldset {
-  border: 2px solid #d74ac7; /* Width, style, and color */
+  border: 2px solid #ebebeb; /* Width, style, and color */
   border-radius: 6px;        /* Optional: rounds the corners */
+}
+
+.settings-form {
+    display:grid;
+    grid-template-columns: max-content max-content;
+    grid-gap:5px;
+}
+.settings-form label       { text-align:right; }
+.settings-form label:after { content: ":"; }
+
+.buttons-form {
+  display: flex;
+  justify-content: space-evenly; /* Change this value based on your needs */
 }

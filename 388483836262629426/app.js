@@ -2,8 +2,7 @@ const settings = document.getElementById('settings');
 const sessionsInput = document.getElementById('sessions');
 const studyInput = document.getElementById('study-length');
 const breakInput = document.getElementById('break-length');
-const breakHint = document.getElementById('break-hint');
-    
+
 const startButton = document.getElementById('start-button');
 const pauseButton = document.getElementById('pause-button');
 const resetButton = document.getElementById('reset-button');
@@ -37,8 +36,7 @@ const updateBreakConstraints = () => {
     const maxBreak = Math.floor(studyValue / 2);
     breakInput.min = minBreak;
     breakInput.max = maxBreak;
-    breakHint.textContent = `(min: ${minBreak}, max: ${maxBreak})`;
-    
+
     if (breakValue < minBreak) breakInput.value = minBreak;
     if (breakValue > maxBreak) breakInput.value = maxBreak;
 };
@@ -57,27 +55,29 @@ const updateUI = () => {
 const tick = () => {
     timeLeft--;
 
-    if (phase === 'Ders (kolay gelsibnnn)') totalStudySecondsCompleted++;
+    if (phase === 'Ders') totalStudySecondsCompleted++;
     
     if (timeLeft <= 0) {
         switch (phase) {
-            case 'Ders (kolay gelsibnnn)': 
+            case 'Ders': 
                 completedSessions++;
             
                 if (completedSessions >= totalSessions) {
                     clearInterval(timerInterval);
                     isRunning = false;
-                    phase = 'Bingus (mwahhh)';
+                    phase = 'Bitti';
                 
+                    // Timer is done: disable start/pause, make sure reset is available
                     startButton.disabled = true;
                     pauseButton.disabled = true;
+                    resetButton.disabled = false;
                 } else {    
-                    phase = 'Mola (yeyy, ilysmmm)';
+                    phase = 'Mola';
                     timeLeft = breakSeconds;
                 }
                 break;
-            case 'Mola (yeyy, ilysmmm)':
-                phase = 'Ders (kolay gelsibnnn)';
+            case 'Mola':
+                phase = 'Ders';
                 timeLeft = studySeconds;
                 break;
         }
@@ -99,21 +99,28 @@ startButton.addEventListener('click', () => {
 
         totalSessions = parseInt(sessionsInput.value);
         studySeconds = studyValue * 60;
-        breakSeconds = studyValue * 60;
+        breakSeconds = breakValue * 60;
         timeLeft = studySeconds;
         completedSessions = 0;
         totalStudySecondsCompleted = 0;
             
-        phase = 'Ders (kolay gelsibnnn)';
+        phase = 'Ders';
         isStarted = true;
-        settings.disabled = true;
-        resetButton.disabled = false;
+        
+        // Lock inputs when started
+        sessionsInput.disabled = true;
+        studyInput.disabled = true;
+        breakInput.disabled = true;
     }
 
-    if (!isRunning && phase !== 'Bingus (mwahhh)') {
+    if (!isRunning && phase !== 'Bitti') {
         isRunning = true;
+        
+        // Toggle buttons for running state
         startButton.disabled = true;
         pauseButton.disabled = false;
+        resetButton.disabled = false; // Allow user to reset while running
+        
         timerInterval = setInterval(tick, 1000);
     }
         
@@ -124,8 +131,11 @@ pauseButton.addEventListener('click', () => {
     if (isRunning) {
         clearInterval(timerInterval);
         isRunning = false;
-        startButton.disabled = false;
+        
+        // Toggle buttons for paused state
+        startButton.disabled = false; // Allow them to resume
         pauseButton.disabled = true;
+        resetButton.disabled = false; // Keep reset available
     }
 });
 
@@ -139,10 +149,16 @@ resetButton.addEventListener('click', () => {
     completedSessions = 0;
     totalSessions = 0;
     
-    settings.disabled = false;
+    // Unlock inputs
+    sessionsInput.disabled = false;
+    studyInput.disabled = false;
+    breakInput.disabled = false;
+
+    // Reset button states to initial
     startButton.disabled = false;
     pauseButton.disabled = true;
     resetButton.disabled = true;
+
     phaseDisplay.textContent = 'Başlamadı';
     timeDisplay.textContent = '00:00';
     studyTimeDisplay.textContent = '0 / 0 dk';
