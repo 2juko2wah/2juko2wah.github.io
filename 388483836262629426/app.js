@@ -11,6 +11,7 @@ const phaseDisplay = document.getElementById('phase-display');
 const timeDisplay = document.getElementById('time-display');
 const studyTimeDisplay = document.getElementById('study-time-display');
 const sessionsDisplay = document.getElementById('sessions-display');
+const endTimeDisplay = document.getElementById('end-time-display');
 
 let timerInterval = null;
 let isRunning = false;
@@ -23,8 +24,11 @@ let breakSeconds = 0;
 let timeLeft = 0;
 let completedSessions = 0;
 let totalStudySecondsCompleted = 0;
+let startingTime = 0;
+let endingTime = null;
 
 const formatTime = (seconds) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+const addMinutes = (date, minutes) => new Date(date.getTime() + minutes*60000);
 
 const updateBreakConstraints = () => {
     const studyValue = parseInt(studyInput.value);
@@ -44,12 +48,14 @@ const updateBreakConstraints = () => {
 const updateUI = () => {
     const completedMins = Math.floor(totalStudySecondsCompleted / 60);
     const totalMins = totalSessions * Math.floor(studySeconds / 60);
-    
+    endingTime = addMinutes(startingTime, totalMins);
+
     phaseDisplay.textContent = phase;
     timeDisplay.textContent = formatTime(timeLeft);
     
     studyTimeDisplay.textContent = `${completedMins} / ${totalMins} dk`;
     sessionsDisplay.textContent = `${completedSessions} / ${totalSessions}`;
+    endTimeDisplay.textContent = `${endingTime.getHours()}:${endingTime.getMinutes()}`
 };
 
 const tick = () => {
@@ -103,7 +109,8 @@ startButton.addEventListener('click', () => {
         timeLeft = studySeconds;
         completedSessions = 0;
         totalStudySecondsCompleted = 0;
-            
+        startingTime = new Date();
+        
         phase = 'Ders';
         isStarted = true;
         
