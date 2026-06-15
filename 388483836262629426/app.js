@@ -92,7 +92,7 @@ startButton.addEventListener('click', () => {
         const breakValue = parseInt(breakInput.value);
 
         if (studyValue < 30 || studyValue > 120) 
-            return alert('Ders (kolay gelsibnnn) süresi 30 ile 120 dakika arasında olmalı');
+            return alert('Ders süresi 30 ile 120 dakika arasında olmalı');
 
         if (breakValue < breakInput.min || breakValue > breakInput.max) 
             return alert(`Ara süresi ${breakInput.min} ile ${breakInput.max} dakika arasında olmalı`);
