@@ -192,3 +192,28 @@ resetButton.addEventListener('click', () => {
 
 studyInput.addEventListener('input', updateBreakConstraints);
 updateBreakConstraints();
+
+let lastTickTime = Date.now();
+
+// Update lastTickTime every tick so we know when the last successful second was
+const originalTick = tick; // Keep your old function
+tick = () => {
+    lastTickTime = Date.now();
+    originalTick();
+};
+
+// When the user opens the phone or tab again:
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && isRunning) {
+        const now = Date.now();
+        // Calculate how many seconds we missed while the phone was sleeping
+        const missedSeconds = Math.floor((now - lastTickTime) / 1000);
+        
+        if (missedSeconds > 0) {
+            // Fast-forward the timer
+            for (let i = 0; i < missedSeconds; i++) {
+                if (isRunning) originalTick(); // Simulate the missed ticks
+            }
+        }
+    }
+});
