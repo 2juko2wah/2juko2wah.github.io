@@ -65,8 +65,11 @@ const updateBreakConstraints = () => {
 
 const updateUI = () => {
     const completedMins = Math.floor(totalStudySecondsCompleted / 60);
+
     const totalMins = totalSessions * Math.floor(studySeconds / 60);
-    endingTime = addMinutes(startingTime, totalMins);
+    const breakMins = breakValue * Math.floor(breakSeconds / 60);
+    
+    endingTime = addMinutes(addMinutes(startingTime, totalMins), breakMins);
 
     phaseDisplay.textContent = phase;
     timeDisplay.textContent = formatTime(timeLeft);
