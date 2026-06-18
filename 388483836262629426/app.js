@@ -67,9 +67,8 @@ const updateUI = () => {
     const completedMins = Math.floor(totalStudySecondsCompleted / 60);
 
     const totalMins = totalSessions * Math.floor(studySeconds / 60);
-    const breakMins = breakValue * Math.floor(breakSeconds / 60);
     
-    endingTime = addMinutes(addMinutes(startingTime, totalMins), breakMins);
+    endingTime = addMinutes(startingTime, totalMins);
 
     phaseDisplay.textContent = phase;
     timeDisplay.textContent = formatTime(timeLeft);
