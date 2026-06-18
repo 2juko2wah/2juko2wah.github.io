@@ -6,216 +6,189 @@ const breakInput = document.getElementById('break-length');
 const startButton = document.getElementById('start-button');
 const pauseButton = document.getElementById('pause-button');
 const resetButton = document.getElementById('reset-button');
-    
+
 const phaseDisplay = document.getElementById('phase-display');
 const timeDisplay = document.getElementById('time-display');
 const studyTimeDisplay = document.getElementById('study-time-display');
 const sessionsDisplay = document.getElementById('sessions-display');
 const endTimeDisplay = document.getElementById('end-time-display');
 
-let timerInterval = null;
 let isRunning = false;
 let isStarted = false;
-let phase = 'Başlamadı'; 
+let phase = 'Başlamadı';
 let totalSessions = 0;
-let studySeconds = 0;
-let breakSeconds = 0;
-    
-let timeLeft = 0;
 let completedSessions = 0;
-let totalStudySecondsCompleted = 0;
-let startingTime = 0;
-let endingTime = null;
+
+let studyDurationMs = 0;
+let breakDurationMs = 0;
+
+let targetEndTime = null;
+let pausedRemainingMs = 0;
+let totalStudyMsCompletedAtStartOfPhase = 0; 
 
 const formatTime = (seconds) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
-const addMinutes = (date, minutes) => new Date(date.getTime() + minutes*60000);
-
-const workerCode = `
-    let timerInterval = null;
-    self.onmessage = function(e) {
-        if (e.data === 'start') {
-            timerInterval = setInterval(() => self.postMessage('tick'), 1000);
-        } else if (e.data === 'stop') {
-            clearInterval(timerInterval);
-        }
-    };
-`;
-const blob = new Blob([workerCode], { type: 'application/javascript' });
-const worker = new Worker(URL.createObjectURL(blob));
-
-// When the worker sends a 'tick' message, run your existing tick logic
-worker.onmessage = () => {
-    tick(); 
-};
 
 const updateBreakConstraints = () => {
     const studyValue = parseInt(studyInput.value);
-    const breakValue = parseInt(breakInput.value);
 
     if (isNaN(studyValue) || studyValue < 30 || studyValue > 120) return;
-
+    
     const minBreak = Math.ceil(studyValue / 6);
     const maxBreak = Math.floor(studyValue / 2);
+    
     breakInput.min = minBreak;
     breakInput.max = maxBreak;
-
-    if (breakValue < minBreak) breakInput.value = minBreak;
-    if (breakValue > maxBreak) breakInput.value = maxBreak;
+    if (parseInt(breakInput.value) < minBreak) breakInput.value = minBreak;
+    if (parseInt(breakInput.value) > maxBreak) breakInput.value = maxBreak;
 };
 
-const updateUI = () => {
-    const completedMins = Math.floor(totalStudySecondsCompleted / 60);
+const syncTimer = () => {
+    if (!isRunning) return;
 
-    const totalMins = totalSessions * Math.floor(studySeconds / 60);
-    
-    endingTime = addMinutes(startingTime, totalMins);
+    const now = Date.now();
+    let remainingMs = targetEndTime - now;
 
-    phaseDisplay.textContent = phase;
-    timeDisplay.textContent = formatTime(timeLeft);
-    
-    studyTimeDisplay.textContent = `${completedMins} / ${totalMins} dk`;
-    sessionsDisplay.textContent = `${completedSessions} / ${totalSessions}`;
-    endTimeDisplay.textContent = `${endingTime.getHours().toString().padStart(2, '0')}:${endingTime.getMinutes().toString().padStart(2, '0')}`
-};
-
-const tick = () => {
-    timeLeft--;
-
-    if (phase === 'Ders') totalStudySecondsCompleted++;
-    
-    if (timeLeft <= 0) {
-        switch (phase) {
-            case 'Ders': 
-                completedSessions++;
+    if (remainingMs <= 0) {
+        if (phase === 'Ders') {
+            completedSessions++;
+            totalStudyMsCompletedAtStartOfPhase += studyDurationMs;
             
-                if (completedSessions >= totalSessions) {
-                    clearInterval(timerInterval);
-                    isRunning = false;
-                    phase = 'Bitti';
-                
-                    // Timer is done: disable start/pause, make sure reset is available
-                    startButton.disabled = true;
-                    pauseButton.disabled = true;
-                    resetButton.disabled = false;
-                } else {    
-                    phase = 'Mola';
-                    timeLeft = breakSeconds;
-                }
-                break;
-            case 'Mola':
-                phase = 'Ders';
-                timeLeft = studySeconds;
-                break;
+            if (completedSessions >= totalSessions) {
+                endCycle();
+                return;
+            } else {
+                phase = 'Mola';
+                remainingMs = breakDurationMs;
+                targetEndTime = now + remainingMs;
+            }
+        } else if (phase === 'Mola') {
+            phase = 'Ders';
+            remainingMs = studyDurationMs;
+            targetEndTime = now + remainingMs;
         }
     }
+
+    updateUI(remainingMs);
+};
+
+setInterval(syncTimer, 200);
+
+const updateUI = (currentRemainingMs = 0) => {
+    const displaySeconds = Math.max(0, Math.ceil(currentRemainingMs / 1000));
+
+    timeDisplay.textContent = formatTime(displaySeconds);
+    phaseDisplay.textContent = phase;
+    sessionsDisplay.textContent = `${completedSessions} / ${totalSessions}`;
     
-    updateUI();
+    let currentSessionProgress = 0;
+    if (phase === 'Ders' && isRunning) {
+        currentSessionProgress = studyDurationMs - currentRemainingMs;
+    }
+
+    const totalStudyMins = Math.floor((totalStudyMsCompletedAtStartOfPhase + currentSessionProgress) / 60000);
+    const goalMins = (totalSessions * studyDurationMs) / 60000;
+
+    studyTimeDisplay.textContent = `${totalStudyMins} / ${goalMins} dk`;
+
+    if (isStarted && phase !== 'Bitti') {
+        const totalRemainingInCycle = calculateTotalRemainingMs(currentRemainingMs);
+        const endData = new Date(Date.now() + totalRemainingInCycle);
+        endTimeDisplay.textContent = `${endData.getHours().toString().padStart(2, '0')}:${endData.getMinutes().toString().padStart(2, '0')}`;
+    }
+};
+
+const calculateTotalRemainingMs = (currentRemainingMs) => {
+    let total = currentRemainingMs;
+    const sessionsLeft = totalSessions - completedSessions;
+    
+    if (phase === 'Ders') {
+        total += (sessionsLeft - 1) * studyDurationMs;
+        total += (sessionsLeft - 1) * breakDurationMs;
+    } else if (phase === 'Mola') {
+        total += (sessionsLeft) * studyDurationMs;
+        total += (sessionsLeft - 1) * breakDurationMs;
+    }
+    return total;
+};
+
+const endCycle = () => {
+    isRunning = false;
+    isStarted = false;
+
+    phase = 'Bitti';
+    
+    startButton.disabled = true;
+    pauseButton.disabled = true;
+    resetButton.disabled = false;
+    
+    updateUI(0);
 };
 
 startButton.addEventListener('click', () => {
     if (!isStarted) {
-        const studyValue = parseInt(studyInput.value);
-        const breakValue = parseInt(breakInput.value);
-
-        if (studyValue < 30 || studyValue > 120) 
-            return alert('Ders süresi 30 ile 120 dakika arasında olmalı');
-
-        if (breakValue < breakInput.min || breakValue > breakInput.max) 
-            return alert(`Ara süresi ${breakInput.min} ile ${breakInput.max} dakika arasında olmalı`);
-
-        totalSessions = parseInt(sessionsInput.value);
-        studySeconds = studyValue * 60;
-        breakSeconds = breakValue * 60;
-        timeLeft = studySeconds;
-        completedSessions = 0;
-        totalStudySecondsCompleted = 0;
-        startingTime = new Date();
+        const sVal = parseInt(studyInput.value);
+        const bVal = parseInt(breakInput.value);
         
+        totalSessions = parseInt(sessionsInput.value);
+        studyDurationMs = sVal * 60 * 1000;
+        breakDurationMs = bVal * 60 * 1000;
+        
+        pausedRemainingMs = studyDurationMs;
         phase = 'Ders';
+        completedSessions = 0;
+        totalStudyMsCompletedAtStartOfPhase = 0;
         isStarted = true;
         
-        // Lock inputs when started
         sessionsInput.disabled = true;
         studyInput.disabled = true;
         breakInput.disabled = true;
     }
 
-    if (!isRunning && phase !== 'Bitti') {
-        isRunning = true;
-        
-        // Toggle buttons for running state
-        startButton.disabled = true;
-        pauseButton.disabled = false;
-        resetButton.disabled = false; // Allow user to reset while running
-        
-        worker.postMessage('start');
-    }
-        
-    updateUI();
+    isRunning = true;
+    targetEndTime = Date.now() + pausedRemainingMs;
+    
+    startButton.disabled = true;
+    pauseButton.disabled = false;
+    resetButton.disabled = false;
 });
 
 pauseButton.addEventListener('click', () => {
     if (isRunning) {
-        worker.postMessage('stop');
         isRunning = false;
+        pausedRemainingMs = targetEndTime - Date.now();
         
-        // Toggle buttons for paused state
-        startButton.disabled = false; // Allow them to resume
+        startButton.disabled = false;
         pauseButton.disabled = true;
-        resetButton.disabled = false; // Keep reset available
     }
 });
 
 resetButton.addEventListener('click', () => {
-    worker.postMessage('stop');
     isRunning = false;
     isStarted = false;
     phase = 'Başlamadı';
-    timeLeft = 0;
-    totalStudySecondsCompleted = 0;
+    pausedRemainingMs = 0;
     completedSessions = 0;
-    totalSessions = 0;
-    
-    // Unlock inputs
+    totalStudyMsCompletedAtStartOfPhase = 0;
+
     sessionsInput.disabled = false;
     studyInput.disabled = false;
     breakInput.disabled = false;
 
-    // Reset button states to initial
     startButton.disabled = false;
     pauseButton.disabled = true;
     resetButton.disabled = true;
 
-    phaseDisplay.textContent = 'Başlamadı';
     timeDisplay.textContent = '00:00';
-    studyTimeDisplay.textContent = '0 / 0 dk';
-    sessionsDisplay.textContent = '0 / 0';
+    updateUI(0);
 });
 
 studyInput.addEventListener('input', updateBreakConstraints);
-updateBreakConstraints();
 
-let lastTickTime = Date.now();
-
-// Update lastTickTime every tick so we know when the last successful second was
-const originalTick = tick; // Keep your old function
-tick = () => {
-    lastTickTime = Date.now();
-    originalTick();
-};
-
-// When the user opens the phone or tab again:
 document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && isRunning) {
-        const now = Date.now();
-        // Calculate how many seconds we missed while the phone was sleeping
-        const missedSeconds = Math.floor((now - lastTickTime) / 1000);
-        
-        if (missedSeconds > 0) {
-            // Fast-forward the timer
-            for (let i = 0; i < missedSeconds; i++) {
-                if (isRunning) originalTick(); // Simulate the missed ticks
-            }
+    if (document.visibilityState === "visible") {
+        if (isRunning) {
+            const remaining = targetEndTime - Date.now();
+            updateUI(remaining);
         }
     }
 });
