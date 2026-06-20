@@ -45,10 +45,10 @@ const updateBreakConstraints = () => {
 const syncTimer = () => {
     if (!isRunning) return;
 
-    const now = Date.now();
+    let now = Date.now();
     let remainingMs = targetEndTime - now;
 
-    if (remainingMs <= 0) {
+    while (remainingMs <= 0 && isRunning) {
         if (phase === 'Ders') {
             completedSessions++;
             totalStudyMsCompletedAtStartOfPhase += studyDurationMs;
@@ -58,14 +58,15 @@ const syncTimer = () => {
                 return;
             } else {
                 phase = 'Mola';
-                remainingMs = breakDurationMs;
-                targetEndTime = now + remainingMs;
+                targetEndTime += breakDurationMs;
             }
         } else if (phase === 'Mola') {
             phase = 'Ders';
-            remainingMs = studyDurationMs;
-            targetEndTime = now + remainingMs;
+            targetEndTime += studyDurationMs;
         }
+        
+        now = Date.now();
+        remainingMs = targetEndTime - now;
     }
 
     updateUI(remainingMs);
@@ -81,12 +82,13 @@ const updateUI = (currentRemainingMs = 0) => {
     sessionsDisplay.textContent = `${completedSessions} / ${totalSessions}`;
     
     let currentSessionProgress = 0;
-    if (phase === 'Ders' && isRunning) {
-        currentSessionProgress = studyDurationMs - currentRemainingMs;
+
+    if (phase === 'Ders') {
+        currentSessionProgress = Math.max(0, studyDurationMs - currentRemainingMs);
     }
 
     const totalStudyMins = Math.floor((totalStudyMsCompletedAtStartOfPhase + currentSessionProgress) / 60000);
-    const goalMins = (totalSessions * studyDurationMs) / 60000;
+    const goalMins = (totalSessions * studyDurationMs) / 60000 || 0;
 
     studyTimeDisplay.textContent = `${totalStudyMins} / ${goalMins} dk`;
 
@@ -94,6 +96,8 @@ const updateUI = (currentRemainingMs = 0) => {
         const totalRemainingInCycle = calculateTotalRemainingMs(currentRemainingMs);
         const endData = new Date(Date.now() + totalRemainingInCycle);
         endTimeDisplay.textContent = `${endData.getHours().toString().padStart(2, '0')}:${endData.getMinutes().toString().padStart(2, '0')}`;
+    } else {
+        endTimeDisplay.textContent = '--:--';
     }
 };
 
@@ -150,6 +154,8 @@ startButton.addEventListener('click', () => {
     startButton.disabled = true;
     pauseButton.disabled = false;
     resetButton.disabled = false;
+
+    updateUI(pausedRemainingMs);
 });
 
 pauseButton.addEventListener('click', () => {
@@ -159,6 +165,8 @@ pauseButton.addEventListener('click', () => {
         
         startButton.disabled = false;
         pauseButton.disabled = true;
+
+        updateUI(pausedRemainingMs);
     }
 });
 
@@ -168,6 +176,7 @@ resetButton.addEventListener('click', () => {
     phase = 'Başlamadı';
     pausedRemainingMs = 0;
     completedSessions = 0;
+    totalSessions = 0; 
     totalStudyMsCompletedAtStartOfPhase = 0;
 
     sessionsInput.disabled = false;
@@ -178,7 +187,6 @@ resetButton.addEventListener('click', () => {
     pauseButton.disabled = true;
     resetButton.disabled = true;
 
-    timeDisplay.textContent = '00:00';
     updateUI(0);
 });
 
@@ -187,8 +195,9 @@ studyInput.addEventListener('input', updateBreakConstraints);
 document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
         if (isRunning) {
-            const remaining = targetEndTime - Date.now();
-            updateUI(remaining);
+            syncTimer();
+        } else if (isStarted && phase !== 'Bitti') {
+            updateUI(pausedRemainingMs);
         }
     }
 });
