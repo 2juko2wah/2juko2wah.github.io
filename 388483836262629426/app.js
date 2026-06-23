@@ -26,6 +26,21 @@ let targetEndTime = null;
 let pausedRemainingMs = 0;
 let totalStudyMsCompletedAtStartOfPhase = 0; 
 
+const Phase = Object.freeze({
+    BREAK: "Mola",
+    STUDY: "Ders",
+    OVER: "Bitti",
+    NSTART: "Başlamadı",
+})
+
+let appstate = {
+    isRunning: false,
+    isStarted: false,
+    phase: Phase.NSTART,
+    totalSessions: 0, completedSessions: 0,
+    studyDuration: 0, breakDuration: 0,
+}
+
 const formatTime = (seconds) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
 
 const updateBreakConstraints = () => {

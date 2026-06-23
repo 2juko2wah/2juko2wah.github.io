@@ -1,16 +1,21 @@
-.info {
-  display: flow;
-
-  gap: 20px;             
-  
-}
-
 body {
   background-color: #121212;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+hr {
+  width: 100%;
+  border: none; 
+  border-top: 1px solid #ebebeb;
+  margin: 20px 0;
 }
 
 h3, h2, h1,legend, p, label, span {
-    color: #ebebeb;
+  color: #ebebeb;
 }
 
 input {
@@ -18,18 +23,23 @@ input {
   border: none; 
   box-shadow: none;
   color: #ebebeb;
-  
 }
 
 fieldset {
-  border: 2px solid #ebebeb; /* Width, style, and color */
-  border-radius: 6px;        /* Optional: rounds the corners */
+  border: 2px solid #ebebeb;
+  border-radius: 6px;
+}
+
+.info {
+  display: flow;
+  gap: 20px;             
+  
 }
 
 .settings-form, .buttons-form {
-    display:grid;
-    grid-template-columns: max-content max-content;
-    grid-gap:5px;
+  display:grid;
+  grid-template-columns: max-content max-content;
+  grid-gap:5px;
 }
 .settings-form label       { text-align:right; }
 .settings-form label:after { content: ":"; }
@@ -37,21 +47,7 @@ fieldset {
 .buttons-form, .info {
   display: flex;
   justify-content: space-evenly; 
-  width: 100%;      /* Tells the div to stretch across the fieldset */
-  gap: 15px;        /* Forces a guaranteed 15px space between buttons */
-  margin-top: 15px; /* (Optional) Adds a nice visual space between the inputs and buttons */
-}
-body {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Centers items horizontally when direction is column */
-  min-height: 100vh; /* Ensures body spans the full viewport height */
-}
-
-hr {
-  width: 100%; /* Or 80% if you don't want it to touch the exact edges */
-  border: none; 
-  border-top: 1px solid #ebebeb; /* Matches your text/fieldset color */
-  margin: 20px 0; /* Adds some breathing room above and below */
+  width: 100%;      
+  gap: 15px;        
+  margin-top: 15px; 
 }
