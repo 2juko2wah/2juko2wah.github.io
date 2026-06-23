@@ -73,6 +73,31 @@ function saveData() {
     localStorage.setItem('lipGallaFollowerData', JSON.stringify(data));
 }
 
+function wipeAtMidnight() {
+    const now = new Date();
+    const midnight = new Date();
+
+    midnight.setDate(now.getDate() + 1);
+    midnight.setHours(0, 0, 0, 0);
+
+    setTimeout(() => {
+        const savedData = localStorage.getItem('lipGallaFollowerData');
+
+        localStorage.setItem();
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            if (data.length > 0) {
+                data.forEach(item => {
+                    item.solved = 0;
+                });
+            }   
+        }
+
+        localStorage.setItem('lipGallaFollowerData', JSON.stringify(savedData));
+    })
+}
+wipeAtMidnight();
+
 function loadData() {
     const savedData = localStorage.getItem('lipGallaFollowerData');
     
