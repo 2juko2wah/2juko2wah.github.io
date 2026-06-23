@@ -22,15 +22,15 @@ function addEntryToDOM(courseVal, targetVal, solvedVal) {
     
     newEntry.innerHTML = `
         <div> 
-            <h2> Hedef Soru Sayısı </h2>
+            <h2> Hedef </h2>
             <input type="number" class="target-input" value="${targetVal}" min="0" required>
         </div>
         <div> 
-            <h2> Ders Adı </h2>
-            <input type="text" class="course-input" value="${courseVal}" placeholder="Ders Adı" required>
+            <h2> Ders </h2>
+            <input type="text" class="course-input" value="${courseVal}" placeholder="Ad" required>
         </div>
         <div> 
-            <h2> Çözülen Soru Sayısı </h2>
+            <h2> Çözülen </h2>
             <!-- Changed from label to input -->
             <input type="number" class="solved-input" value="${solvedVal}" min="0" required>
         </div>
