@@ -113,3 +113,10 @@ h1, #entries-container, #add-button {
 .remove-button:hover {
   border: 2px solid #f44336;
 }
+
+#date-disp {
+  color: #e35ca5;
+    font-size: 16px;
+
+
+}

@@ -2,6 +2,7 @@ const addButton = document.getElementById('add-button');
 const container = document.getElementById('entries-container');
 const totalSolvedEl = document.getElementById('total-solved');
 const totalTargetEl = document.getElementById('total-target');
+const dateEl = document.getElementById('date-disp');
 
 document.addEventListener('DOMContentLoaded', loadData);
 
@@ -74,29 +75,45 @@ function saveData() {
 }
 
 function wipeAtMidnight() {
-    const now = new Date();
-    const midnight = new Date();
+    function scheduleReset() {
+        const now = new Date();
+        const midnight = new Date();
 
-    midnight.setDate(now.getDate() + 1);
-    midnight.setHours(0, 0, 0, 0);
+        midnight.setDate(now.getDate() + 1);
+        midnight.setHours(0, 0, 0, 0);
 
-    setTimeout(() => {
-        const savedData = localStorage.getItem('lipGallaFollowerData');
+        const msUntilMidnight = midnight - now;
 
-        localStorage.setItem();
-        if (savedData) {
-            const data = JSON.parse(savedData);
-            if (data.length > 0) {
-                data.forEach(item => {
-                    item.solved = 0;
-                });
-            }   
-        }
+        setTimeout(() => {
+            const savedData = localStorage.getItem('lipGallaFollowerData');
 
-        localStorage.setItem('lipGallaFollowerData', JSON.stringify(savedData));
-    })
+            if (savedData) {
+                const data = JSON.parse(savedData);
+
+                if (Array.isArray(data)) {
+                    data.forEach(item => {
+                        item.solved = 0;
+                    });
+
+                    localStorage.setItem(
+                        'lipGallaFollowerData',
+                        JSON.stringify(data)
+                    );
+                }
+            }
+            scheduleReset();
+        }, msUntilMidnight);
+    }
+
+    scheduleReset();
 }
 wipeAtMidnight();
+
+function updateDate() {
+    const date = new Date();
+    dateEl.textContent = `${date.getDate().toString().padStart(2, "0")}/${date.getMonth().toString().padStart(2, "0")}`
+}
+updateDate();
 
 function loadData() {
     const savedData = localStorage.getItem('lipGallaFollowerData');
