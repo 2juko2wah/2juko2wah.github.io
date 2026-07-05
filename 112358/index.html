@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track to My Arms</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --border-color: #6c6c6c;
+            --text-color: #ebebeb;
+            --highlight: #6c6c6c;
+            --disabled-check: #333333;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .grid-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        table {
+            border-collapse: collapse;
+            min-width: 100%;
+
+            table-layout: fixed;
+            background-color: var(--bg-color);
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .day-col {
+            width: 3.5ch;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background-color: #1a1a1a;
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            color: var(--border-color);
+        }
+
+        .dynamic-col {
+            width: 140px;
+        }
+
+        input[type="text"] {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            padding: 12px 5px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"]:focus { background: #1f1f1f; }
+        #newLabelInput::placeholder { color: var(--border-color); }
+
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.1s;
+            margin: 10px;
+        }
+
+        input[type="checkbox"]:not(:disabled) {
+            border-color: var(--text-color);
+        }
+
+        input[type="checkbox"]:disabled {
+            border-color: var(--disabled-check);
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: var(--text-color);
+            border-color: var(--text-color);
+        }
+        input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 8px;
+            border: solid var(--bg-color);
+            border-width: 0 2px 2px 0;
+            transform: translate(-50%, -60%) rotate(45deg);
+            left: 50%;
+            top: 50%;
+        }
+
+        .today-row { background-color: #1a1a1a; }
+        .today-row .day-col { color: var(--text-color); }
+    </style>
+</head>
+<body>
+    <div class="grid-wrapper">
+        <table id="gridTable">
+            <thead>
+                <tr id="headerRow">
+                    <th class="day-col"></th>
+                    <th id="inputHeader" class="dynamic-col">
+                        <input type="text" id="newLabelInput" placeholder="+ Label">
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="gridBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const tableBody = document.getElementById('gridBody');
+        const headerRow = document.getElementById('headerRow');
+        const inputHeader = document.getElementById('inputHeader');
+        const labelInput = document.getElementById('newLabelInput');
+        const today = new Date().getDate();
+
+        let columns = JSON.parse(localStorage.getItem('trackerCols') || '[]');
+
+        function init() {
+            for (let d = 1; d <= today; d++) {
+                const row = document.createElement('tr');
+                if (d === today) row.classList.add('today-row');
+                
+                const dayCell = document.createElement('td');
+                dayCell.className = 'day-col';
+                dayCell.textContent = d;
+                row.appendChild(dayCell);
+                tableBody.appendChild(row);
+            }
+
+            columns.forEach(col => renderColumn(col));
+            syncWidths();
+        }
+
+        function renderColumn(colObj) {
+            const colId = colObj.id;
+
+            const th = document.createElement('th');
+            th.className = 'dynamic-col label-th';
+            th.setAttribute('data-col-id', colId);
+            
+            const editInput = document.createElement('input');
+            editInput.type = 'text';
+            editInput.value = colObj.name;
+            
+            editInput.onblur = () => {
+                const val = editInput.value.trim();
+                if (val === "") {
+                    deleteColumn(colId);
+                } else {
+                    updateColumnName(colId, val);
+                }
+            };
+            
+            editInput.onkeydown = (e) => { if(e.key === 'Enter') editInput.blur(); };
+
+            th.appendChild(editInput);
+            headerRow.insertBefore(th, inputHeader);
+
+            const rows = tableBody.querySelectorAll('tr');
+            rows.forEach((row, index) => {
+                const dayNum = index + 1;
+                const td = document.createElement('td');
+                td.className = `dynamic-col col-data-${colId}`;
+                
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                
+                const storageKey = `check_${colId}_${dayNum}`;
+                cb.checked = localStorage.getItem(storageKey) === 'true';
+
+                if (dayNum !== today) {
+                    cb.disabled = true;
+                } else {
+                    cb.onchange = () => localStorage.setItem(storageKey, cb.checked);
+                }
+
+                td.appendChild(cb);
+                row.appendChild(td);
+            });
+        }
+
+        function updateColumnName(id, newName) {
+            columns = columns.map(c => c.id === id ? { ...c, name: newName } : c);
+            save();
+            syncWidths();
+        }
+
+        function deleteColumn(id) {
+            columns = columns.filter(c => c.id !== id);
+            save();
+            document.querySelectorAll(`[data-col-id="${id}"]`).forEach(el => el.remove());
+            document.querySelectorAll(`.col-data-${id}`).forEach(el => el.remove());
+            syncWidths();
+        }
+
+        function save() { localStorage.setItem('trackerCols', JSON.stringify(columns)); }
+
+        function syncWidths() {
+            const items = document.querySelectorAll('.label-th input');
+            if (items.length === 0) return;
+
+            let max = 120;
+            
+            const dynamicTHs = document.querySelectorAll('.dynamic-col');
+            dynamicTHs.forEach(th => th.style.width = 'auto');
+
+            items.forEach(input => {
+                const textWidth = input.value.length * 9 + 40; 
+                if (textWidth > max) max = textWidth;
+            });
+
+            
+            dynamicTHs.forEach(th => th.style.width = max + 'px');
+        }
+
+        labelInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && labelInput.value.trim() !== '') {
+                const newCol = { id: Date.now(), name: labelInput.value.trim() };
+                columns.push(newCol);
+                save();
+                renderColumn(newCol);
+                labelInput.value = '';
+                syncWidths();
+        
+                document.querySelector('.grid-wrapper').scrollLeft = 9999;
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
