@@ -5,11 +5,16 @@ const totalTargetEl = document.getElementById('total-target');
 const dateEl = document.getElementById('date-disp');
 
 function getTabId() {
-    let tabId = sessionStorage.getItem('tabId');
+    const params = new URLSearchParams(window.location.search);
+    let tabId = params.get('id');
+
     if (!tabId) {
         tabId = crypto.randomUUID();
-        sessionStorage.setItem('tabId', tabId);
+        const url = new URL(window.location.href);
+        url.searchParams.set('id', tabId);
+        history.replaceState({}, '', url);
     }
+
     return tabId;
 }
 
@@ -122,6 +127,7 @@ function wipeAtMidnight() {
         setTimeout(() => {
             checkMidnightReset();
             loadDataIntoDOM();
+            updateDate();
             scheduleReset();
         }, msUntilMidnight);
     }
