@@ -10,9 +10,8 @@ function getTabId() {
 
     if (!tabId) {
         tabId = crypto.randomUUID();
-        const url = new URL(window.location.href);
-        url.searchParams.set('id', tabId);
-        history.replaceState({}, '', url);
+        const newSearch = '?id=' + tabId;
+        history.replaceState({}, '', window.location.pathname + newSearch);
     }
 
     return tabId;
