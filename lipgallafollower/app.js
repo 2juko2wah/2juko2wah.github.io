@@ -4,24 +4,36 @@ const totalSolvedEl = document.getElementById('total-solved');
 const totalTargetEl = document.getElementById('total-target');
 const dateEl = document.getElementById('date-disp');
 
+let TAB_ID;
+let STORAGE_KEY;
+let LAST_RESET_KEY;
+
+document.addEventListener('DOMContentLoaded', function () {
+    TAB_ID = getTabId();
+    STORAGE_KEY = `lipGallaFollowerData_${TAB_ID}`;
+    LAST_RESET_KEY = `lipGallaLastReset_${TAB_ID}`;
+
+    loadData();
+    updateDate();
+    wipeAtMidnight();
+});
+
 function getTabId() {
     const params = new URLSearchParams(window.location.search);
     let tabId = params.get('id');
 
     if (!tabId) {
         tabId = crypto.randomUUID();
-        const newSearch = '?id=' + tabId;
-        history.replaceState({}, '', window.location.pathname + newSearch);
+
+        try {
+            history.replaceState({}, '', window.location.pathname + '?id=' + tabId);
+        } catch (e) {
+            window.location.search = '?id=' + tabId;
+        }
     }
 
     return tabId;
 }
-
-const TAB_ID = getTabId();
-const STORAGE_KEY = `lipGallaFollowerData_${TAB_ID}`;
-const LAST_RESET_KEY = `lipGallaLastReset_${TAB_ID}`;
-
-document.addEventListener('DOMContentLoaded', loadData);
 
 addButton.addEventListener('click', function () {
     addEntryToDOM('', 100, 0);
@@ -133,7 +145,6 @@ function wipeAtMidnight() {
 
     scheduleReset();
 }
-wipeAtMidnight();
 
 function updateDate() {
     const date = new Date();
@@ -143,7 +154,6 @@ function updateDate() {
 
     dateEl.textContent = `${day}/${month}`;
 }
-updateDate();
 
 function loadDataIntoDOM() {
     container.innerHTML = '';
